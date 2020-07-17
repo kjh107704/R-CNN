@@ -104,3 +104,23 @@ for e,i in enumerate(os.listdir(annot)):
         print("error in "+filename)
         continue
 
+# %%
+class AirplaneAndBackgroundDataset(Dataset):
+    def __init__(self, x_data, y_data):
+        self.x_data = x_data
+        self.y_data = y_data
+
+    def __len__(self):
+        return len(self.x_data)
+    
+    def __getitem__(self, index):
+        img = self.x_data[index]
+        label = self.y_data[index]
+        return img, label
+# %%
+X_new = np.array(train_images)
+Y_new = np.array(train_labels)
+
+# %%
+train_dataSet = AirplaneAndBackgroundDataset(X_new,Y_new)
+train_dataloader = DataLoader(dataset=dataSet,batch_size=2,shuffle=True)
