@@ -372,37 +372,6 @@ class Show_Result:
             self.ccols = 0
         else:
             self.ccols = self.ccols + 1
-    """
-    def addResult(self, regions):
-        candidates = set()
-        for r in regions:
-            # excluding same rectangle (with different segments)
-            if r['rect'] in candidates:
-                continue
-            # excluding regions smaller than 500 pixels
-            #if r['size'] < 500:
-            #    continue
-            # distorted rects
-            x, y, w, h = r['rect']
-            #if w / h > 1.2 or h / w > 1.2:
-            #    continue
-            candidates.add(r['rect'])
-            
-        self.ax[self.crows][self.ccols].imshow(self.img)
-            
-        for x, y, w, h in candidates:
-            #print(x, y, w, h)
-            rect = mpatches.Rectangle((x, y), w, h, fill=False, edgecolor='red', linewidth=1)
-            self.ax[self.crows][self.ccols].add_patch(rect)
-        self.ax[self.crows][self.ccols].set_title('test', fontsize=20)
-        
-        if self.ccols+1 == self.ncols:
-            self.crows = self.crows + 1
-            self.ccols = 0
-        else:
-            self.ccols = self.ccols + 1
-    
-    """
     def showResult(self):
         plt.show()
         
