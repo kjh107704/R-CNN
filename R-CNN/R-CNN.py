@@ -18,8 +18,8 @@ import json
 
 # %%
 BASE_PATH = "R-CNN/"
-PATH = BASE_PATH + "Images"
-ANNOT = BASE_PATH + "Airplanes_Annotations"
+PATH = "Images"
+ANNOT = "Airplanes_Annotations"
 
 # %%
 ss = cv2.ximgproc.segmentation.createSelectiveSearchSegmentation()
@@ -49,13 +49,13 @@ def get_iou(bb1, bb2):
 train_images=[]
 train_labels=[]
 
-for e,i in enumerate(os.listdir(annot)):
+for e,i in enumerate(os.listdir(ANNOT)):
     try:
         if i.startswith("airplane"):
             filename = i.split(".")[0]+".jpg"
             print(e,filename)
-            image = cv2.imread(os.path.join(path,filename))
-            df = pd.read_csv(os.path.join(annot,i))
+            image = cv2.imread(os.path.join(PATH,filename))
+            df = pd.read_csv(os.path.join(ANNOT,i))
             gtvalues=[]
             for row in df.iterrows():
                 x1 = int(row[1][0].split(" ")[0])
@@ -106,6 +106,8 @@ for e,i in enumerate(os.listdir(annot)):
         continue
 
 # %%
+print(train_images[0].shape)
+# %%
 class AirplaneAndBackgroundDataset(Dataset):
     def __init__(self, x_data, y_data):
         self.x_data = x_data
@@ -120,11 +122,12 @@ class AirplaneAndBackgroundDataset(Dataset):
         return img, label
 # %%
 X_new = np.array(train_images)
+X_tensor = transforms.ToTensor
+print(X_tensor.size())
 Y_new = np.array(train_labels)
-
 # %%
 train_dataSet = AirplaneAndBackgroundDataset(X_new,Y_new)
-train_dataloader = DataLoader(dataset=dataSet,batch_size=2,shuffle=True)
+train_dataloader = DataLoader(dataset=train_dataSet,batch_size=2,shuffle=True)
 # %%
 vgg = models.vgg16(pretrained=True)
 
