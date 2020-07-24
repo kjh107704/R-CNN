@@ -73,6 +73,7 @@ plt.imshow(cv2.cvtColor(heatmap, cv2.COLOR_BGR2GRAY), cmap='gray')
 
 # %%
 # color image를 gray scale로 바꾼 후, threshold를 적용함
+# threshold는 고정 값으로 mean(min, max)
 def getGrayscaleImageWithThreshold(orig_img):
     gray_img = cv2.cvtColor(orig_img, cv2.COLOR_BGR2GRAY)
     
@@ -80,19 +81,18 @@ def getGrayscaleImageWithThreshold(orig_img):
     max_val = np.max(gray_img)
     threshold = (min_val + max_val) / 2
     
-    gray_img = np.where(gray_img > threshold, 1, 0)
-    gray_img = gray_img.astype('int32')
+    ret, gray_img = cv2.threshold(gray_img, threshold, 1, cv2.THRESH_BINARY)    
     
-
     return gray_img
 
 
 # %%
 # grayscale_mask 에서 1인 부분만 orig_img를 보여줌. 0인 부분은 검정색으로 보임
 def showMaskedRegion(orig_img, grayscale_mask):
-    mask = cv2.cvtColor(np.float32(gray_map), cv2.COLOR_GRAY2BGR)
+    mask = cv2.cvtColor(gray_map, cv2.COLOR_GRAY2BGR)
     
     maskedRegion = np.where(mask == 1, img, 0)
+    
     plt.imshow(cv2.cvtColor(maskedRegion, cv2.COLOR_BGR2RGB))
 
 
