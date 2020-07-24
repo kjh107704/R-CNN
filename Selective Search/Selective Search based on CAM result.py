@@ -46,7 +46,7 @@ orig_heatmaps.append(cv2.applyColorMap(cv2.resize(tiger_data, (width, height)), 
 
 # %%
 # orig_img에서 (R, G, B) 세 가지 채널의 정보 중 특정 채널의 정보만 남겨서 넘김
-def getChannelImage(orig_img, channel):
+def get_channel_image(orig_img, channel):
     channel = channel.upper()
     channel_img = orig_img.copy()
     if channel == 'R':
@@ -74,7 +74,7 @@ plt.imshow(cv2.cvtColor(heatmap, cv2.COLOR_BGR2GRAY), cmap='gray')
 # %%
 # color image를 gray scale로 바꾼 후, threshold를 적용함
 # threshold는 고정 값으로 mean(min, max)
-def getGrayscaleImageWithThreshold(orig_img):
+def get_grayscale_image_with_threshold(orig_img):
     gray_img = cv2.cvtColor(orig_img, cv2.COLOR_BGR2GRAY)
     
     min_val = np.min(gray_img)
@@ -88,7 +88,7 @@ def getGrayscaleImageWithThreshold(orig_img):
 
 # %%
 # grayscale_mask 에서 1인 부분만 orig_img를 보여줌. 0인 부분은 검정색으로 보임
-def showMaskedRegion(orig_img, grayscale_mask):
+def get_masked_image(orig_img, gray_map):
     mask = cv2.cvtColor(gray_map, cv2.COLOR_GRAY2BGR)
     
     maskedRegion = np.where(mask == 1, img, 0)
@@ -104,17 +104,16 @@ showMaskedRegion(img, gray_map)
 
 
 # %%
-def getContours(img_binary):
-    contours, hierarchy = cv2.findContours(gray_map, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+def get_contours(img_binary):
     
     return contours
 
 
 # %%
-def getBoundingBox(img_binary):
+def get_bounding_box(img_binary):
     bb = []
     
-    contours = getContours(img_binary)
+    contours = get_contours(img_binary)
     
     for cnt in contours:
         x, y, w, h = cv2.boundingRect(cnt)
@@ -124,7 +123,7 @@ def getBoundingBox(img_binary):
 
 
 # %%
-def drawBoundingBox(bounding_box, img):
+def draw_bounding_box(bounding_box, img):
     tmp_img = img.copy()
     for x, y, w, h in bounding_box:
         cv2.rectangle(tmp_img, (x, y), (x + w, y + h), (0, 255, 0), 2)
@@ -133,8 +132,7 @@ def drawBoundingBox(bounding_box, img):
 
 
 # %%
-def compareContourAndBoundingBox(img_binary, img):
-    contours = getContours(img_binary)
+def get_image_of_compare_contour_and_bounding_box(img_binary, img):
     
     tmp_img = img.copy()
     
