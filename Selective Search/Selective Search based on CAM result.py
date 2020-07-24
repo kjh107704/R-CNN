@@ -63,10 +63,18 @@ def get_channel_image(orig_img, channel):
 
 
 # %%
+heatmaps = []
+for index, orig_heatmap in enumerate(orig_heatmaps):
 # orig_heatmap에서 `R` 계열이 가장 중요한 feature 부분을 나타내므로 해당 정보만 사용
-heatmap = getChannelImage(orig_heatmaps[1], 'r')
+    heatmaps.append(get_channel_image(orig_heatmap, 'r'))
+    
+fig, ax = plt.subplots(nrows=1, ncols=len(heatmaps))
+    
+for index, heatmap in enumerate(heatmaps):
 # orig_heatmap의 R 채널 데이터를 gray scale로 출력
-plt.imshow(cv2.cvtColor(heatmap, cv2.COLOR_BGR2GRAY), cmap='gray')
+    ax[index].imshow(cv2.cvtColor(heatmap, cv2.COLOR_BGR2GRAY), cmap='gray')
+
+plt.show()
 
 # %% [markdown]
 # # CAM 결과를 이용하여 Bounding Box 잡기
@@ -91,20 +99,34 @@ def get_grayscale_image_with_threshold(orig_img):
 def get_masked_image(orig_img, gray_map):
     mask = cv2.cvtColor(gray_map, cv2.COLOR_GRAY2BGR)
     
-    maskedRegion = np.where(mask == 1, img, 0)
+    maskedRegion = np.where(mask == 1, orig_img, 0)
     
-    plt.imshow(cv2.cvtColor(maskedRegion, cv2.COLOR_BGR2RGB))
+    return cv2.cvtColor(maskedRegion, cv2.COLOR_BGR2RGB)
 
 
 # %%
-# gray scale img로 바꾸고, threshold 이상의 값만 binary로 살림
-gray_map = getGrayscaleImageWithThreshold(heatmap)
+graymaps = []
 
-showMaskedRegion(img, gray_map)
+for index, heatmap in enumerate(heatmaps):
+# gray scale img로 바꾸고, threshold 이상의 값만 binary로 살림
+    graymaps.append(get_grayscale_image_with_threshold(heatmap))
+
+# threshold가 적용된 graymap 결과 확인
+fig, ax = plt.subplots(nrows=1, ncols=len(graymaps))
+for index, graymap in enumerate(graymaps):
+    ax[index].imshow(graymap, cmap="gray")
+plt.show()
+
+
+fig, ax = plt.subplots(nrows=1, ncols=len(graymaps))
+for index, graymap in enumerate(graymaps):
+    ax[index].imshow(get_masked_image(img, graymap))
+plt.show()
 
 
 # %%
 def get_contours(img_binary):
+    contours, hierarchy = cv2.findContours(img_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
     return contours
 
@@ -125,14 +147,24 @@ def get_bounding_box(img_binary):
 # %%
 def draw_bounding_box(bounding_box, img):
     tmp_img = img.copy()
+
+    dim = np.array(bounding_box).ndim
+    
+    if dim == 2:
     for x, y, w, h in bounding_box:
         cv2.rectangle(tmp_img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+    elif dim == 3:
+        for bb in bounding_box:
+            for x, y, w, h in bb:
+                cv2.rectangle(tmp_img, (x, y), (x + w, y + h), (0, 255, 0), 2)
         
-    plt.imshow(cv2.cvtColor(tmp_img, cv2.COLOR_BGR2RGB))
+    return cv2.cvtColor(tmp_img, cv2.COLOR_BGR2RGB)
 
 
 # %%
 def get_image_of_compare_contour_and_bounding_box(img_binary, img):
+    
+    contours = get_contours(img_binary)
     
     tmp_img = img.copy()
     
@@ -141,15 +173,31 @@ def get_image_of_compare_contour_and_bounding_box(img_binary, img):
         cv2.drawContours(tmp_img, [cnt], 0, (0,0,255),3)
     
     # draw bounding box - green
-    bb = getBoundingBox(img_binary)
+    bb = get_bounding_box(img_binary)
     for x, y, w, h in bb:
         cv2.rectangle(tmp_img, (x, y), (x + w, y + h), (0, 255, 0), 3)
         
-    plt.imshow(cv2.cvtColor(tmp_img, cv2.COLOR_BGR2RGB))
+    return cv2.cvtColor(tmp_img, cv2.COLOR_BGR2RGB)
 
 
 # %%
+fig, ax = plt.subplots(nrows=1, ncols=len(heatmaps))
+
+for index, graymap in enumerate(graymaps):
 # contour 영역과 bounding box 비교
+    ax[index].imshow(get_image_of_compare_contour_and_bounding_box(graymap, img))
+    
+plt.show()
+
+
+# %%
+CAM_BB = []
+
+for index, graymap in enumerate(graymaps):
+    CAM_BB.append(get_bounding_box(graymap))
+
+plt.imshow(draw_bounding_box(CAM_BB, img))
+
 # %% [markdown]
 # # Selective Search 결과와 CAM Bounding Box 비교
 
