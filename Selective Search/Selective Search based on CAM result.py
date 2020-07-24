@@ -33,13 +33,9 @@ height, width, _ = img.shape
 
 # orig_heatmaps[0] = lion heatmap
 orig_heatmaps.append(cv2.applyColorMap(cv2.resize(lion_data, (width, height)), cv2.COLORMAP_JET))
-#result = orig_heatmaps[0] *0.7 + img + 0.5
-#cv2.imshow(PATH+'lion_heatmap.jpg',result)
 
 # orig_heatmaps[1] = tiger heatmap
 orig_heatmaps.append(cv2.applyColorMap(cv2.resize(tiger_data, (width, height)), cv2.COLORMAP_JET))
-#result = orig_heatmaps[1] *0.7 + img + 0.5
-#cv2.imwrite(PATH+'tiger_heatmap.jpg',heatmap)
 
 # %% [markdown]
 # # color channel별 heatmap 뽑기
@@ -65,15 +61,15 @@ def get_channel_image(orig_img, channel):
 # %%
 heatmaps = []
 for index, orig_heatmap in enumerate(orig_heatmaps):
-# orig_heatmap에서 `R` 계열이 가장 중요한 feature 부분을 나타내므로 해당 정보만 사용
+    # orig_heatmap에서 `R` 계열이 가장 중요한 feature 부분을 나타내므로 해당 정보만 사용
     heatmaps.append(get_channel_image(orig_heatmap, 'r'))
     
 fig, ax = plt.subplots(nrows=1, ncols=len(heatmaps))
     
 for index, heatmap in enumerate(heatmaps):
-# orig_heatmap의 R 채널 데이터를 gray scale로 출력
+    # orig_heatmap의 R 채널 데이터를 gray scale로 출력
     ax[index].imshow(cv2.cvtColor(heatmap, cv2.COLOR_BGR2GRAY), cmap='gray')
-
+    
 plt.show()
 
 # %% [markdown]
@@ -90,7 +86,7 @@ def get_grayscale_image_with_threshold(orig_img):
     threshold = (min_val + max_val) / 2
     
     ret, gray_img = cv2.threshold(gray_img, threshold, 1, cv2.THRESH_BINARY)    
-    
+
     return gray_img
 
 
@@ -108,7 +104,7 @@ def get_masked_image(orig_img, gray_map):
 graymaps = []
 
 for index, heatmap in enumerate(heatmaps):
-# gray scale img로 바꾸고, threshold 이상의 값만 binary로 살림
+    # gray scale img로 바꾸고, threshold 이상의 값만 binary로 살림
     graymaps.append(get_grayscale_image_with_threshold(heatmap))
 
 # threshold가 적용된 graymap 결과 확인
@@ -151,8 +147,8 @@ def draw_bounding_box(bounding_box, img):
     dim = np.array(bounding_box).ndim
     
     if dim == 2:
-    for x, y, w, h in bounding_box:
-        cv2.rectangle(tmp_img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        for x, y, w, h in bounding_box:
+            cv2.rectangle(tmp_img, (x, y), (x + w, y + h), (0, 255, 0), 2)
     elif dim == 3:
         for bb in bounding_box:
             for x, y, w, h in bb:
@@ -184,7 +180,7 @@ def get_image_of_compare_contour_and_bounding_box(img_binary, img):
 fig, ax = plt.subplots(nrows=1, ncols=len(heatmaps))
 
 for index, graymap in enumerate(graymaps):
-# contour 영역과 bounding box 비교
+    # contour 영역과 bounding box 비교
     ax[index].imshow(get_image_of_compare_contour_and_bounding_box(graymap, img))
     
 plt.show()
@@ -293,5 +289,4 @@ bounding_box = get_candidate_bounding_box(SS_BB, CAM_BB)
 plt.imshow(draw_bounding_box(bounding_box, img))
 print(f'num of candidate bounding box: {len(bounding_box)}')
 
-drawBoundingBox(bounding_box, img)
 
