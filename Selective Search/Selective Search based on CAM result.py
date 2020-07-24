@@ -97,6 +97,66 @@ def showMaskedRegion(orig_img, grayscale_mask):
 
 
 # %%
+# gray scale img로 바꾸고, threshold 이상의 값만 binary로 살림
 gray_map = getGrayscaleImageWithThreshold(heatmap)
 
 showMaskedRegion(img, gray_map)
+
+
+# %%
+def getContours(img_binary):
+    contours, hierarchy = cv2.findContours(gray_map, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    
+    return contours
+
+
+# %%
+def getBoundingBox(img_binary):
+    bb = []
+    
+    contours = getContours(img_binary)
+    
+    for cnt in contours:
+        x, y, w, h = cv2.boundingRect(cnt)
+        bb.append([x, y, w, h])
+        
+    return bb
+
+
+# %%
+def drawBoundingBox(bounding_box, img):
+    tmp_img = img.copy()
+    for x, y, w, h in bounding_box:
+        cv2.rectangle(tmp_img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        
+    plt.imshow(cv2.cvtColor(tmp_img, cv2.COLOR_BGR2RGB))
+
+
+# %%
+def compareContourAndBoundingBox(img_binary, img):
+    contours = getContours(img_binary)
+    
+    tmp_img = img.copy()
+    
+    # draw contours - red
+    for cnt in contours:
+        cv2.drawContours(tmp_img, [cnt], 0, (0,0,255),3)
+    
+    # draw bounding box - green
+    bb = getBoundingBox(img_binary)
+    for x, y, w, h in bb:
+        cv2.rectangle(tmp_img, (x, y), (x + w, y + h), (0, 255, 0), 3)
+        
+    plt.imshow(cv2.cvtColor(tmp_img, cv2.COLOR_BGR2RGB))
+
+
+# %%
+# contour 영역과 bounding box 비교
+compareContourAndBoundingBox(gray_map, img)
+
+
+# %%
+bounding_box = getBoundingBox(gray_map)
+
+drawBoundingBox(bounding_box, img)
+
