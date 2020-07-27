@@ -228,6 +228,36 @@ plt.imshow(draw_bounding_box(SS_BB, img))
 
 
 # %%
+_img = img.copy()
+
+for index, (x, y, w, h)  in enumerate(SS_BB):
+    if index < 2000:
+        cv2.rectangle(_img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+plt.imshow(cv2.cvtColor(_img, cv2.COLOR_BGR2RGB))
+
+
+# %%
+_img2 = img.copy()
+
+for index, (x, y, w, h)  in enumerate(SS_BB):
+    if index < 1000:
+        cv2.rectangle(_img2, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+plt.imshow(cv2.cvtColor(_img2, cv2.COLOR_BGR2RGB))
+
+
+# %%
+_img2 = img.copy()
+
+for index, (x, y, w, h)  in enumerate(SS_BB):
+    if index < 500:
+        cv2.rectangle(_img2, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+plt.imshow(cv2.cvtColor(_img2, cv2.COLOR_BGR2RGB))
+
+
+# %%
 def get_iou(_bb1, _bb2, changeScale = False):
     if changeScale:
         # _bb1, _bb2 = [x, y, w, h]
