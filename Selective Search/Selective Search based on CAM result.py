@@ -304,6 +304,14 @@ def get_iou(_bb1, _bb2, changeScale = False):
 
 
 # %%
+def isExist(bounding_box, bb):
+    for _bb in bounding_box:
+        if np.array_equal(_bb, bb):
+            return True
+    return False
+
+
+# %%
 def get_candidate_bounding_box(SS_BB, CAM_BB):
     # SS_BB dim = 2
     # CAM_BB dim = 3
@@ -315,6 +323,7 @@ def get_candidate_bounding_box(SS_BB, CAM_BB):
             for cam_bb in cam_bbs:
                 iou = get_iou(ss_bb, cam_bb, changeScale = True)
                 if iou > 0.7:
+                    if not isExist(bounding_box, ss_bb):
                     bounding_box.append(ss_bb)
     return bounding_box
 
