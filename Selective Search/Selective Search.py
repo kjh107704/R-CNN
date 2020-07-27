@@ -1,15 +1,6 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# # Selective Search
-# 
-# [Selective Search for Object Detection (C++/python)](https://www.learnopencv.com/selective-search-for-object-detection-cpp-python/) 
-# 
-# <https://github.com/AlpacaDB/selectivesearch/blob/develop/selectivesearch/selectivesearch.py>
-
-# In[2]:
-
-
+# To add a new cell, type '# %%'
+# To add a new markdown cell, type '# %% [markdown]'
+# %%
 from __future__ import division
 
 import skimage.data
@@ -26,9 +17,10 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import copy
 import random
+import cv2
 
 
-# In[2]:
+# %%
 
 
 def _generate_segments(im_orig, scale, sigma, min_size):
@@ -51,7 +43,7 @@ def _generate_segments(im_orig, scale, sigma, min_size):
     return im_orig, im_mask
 
 
-# In[3]:
+# %%
 
 
 def _sim_colour(r1, r2):
@@ -61,7 +53,7 @@ def _sim_colour(r1, r2):
     return sum([min(a, b) for a, b in zip(r1["hist_c"], r2["hist_c"])])
 
 
-# In[4]:
+# %%
 
 
 def _sim_texture(r1, r2):
@@ -71,7 +63,7 @@ def _sim_texture(r1, r2):
     return sum([min(a, b) for a, b in zip(r1["hist_t"], r2["hist_t"])])
 
 
-# In[5]:
+# %%
 
 
 def _sim_size(r1, r2, imsize):
@@ -81,7 +73,7 @@ def _sim_size(r1, r2, imsize):
     return 1.0 - (r1["size"] + r2["size"]) / imsize
 
 
-# In[6]:
+# %%
 
 
 def _sim_fill(r1, r2, imsize):
@@ -95,7 +87,7 @@ def _sim_fill(r1, r2, imsize):
     return 1.0 - (bbsize - r1["size"] - r2["size"]) / imsize
 
 
-# In[7]:
+# %%
 
 
 def _calc_sim(r1, r2, imsize):
@@ -103,7 +95,7 @@ def _calc_sim(r1, r2, imsize):
             + _sim_size(r1, r2, imsize) + _sim_fill(r1, r2, imsize))
 
 
-# In[8]:
+# %%
 
 
 def _calc_colour_hist(img):
@@ -132,7 +124,7 @@ def _calc_colour_hist(img):
     return hist
 
 
-# In[9]:
+# %%
 
 
 def _calc_texture_gradient(img):
@@ -151,7 +143,7 @@ def _calc_texture_gradient(img):
     return ret
 
 
-# In[10]:
+# %%
 
 
 def _calc_texture_hist(img):
@@ -181,7 +173,7 @@ def _calc_texture_hist(img):
     return hist
 
 
-# In[11]:
+# %%
 
 
 def _extract_regions(img):
@@ -230,7 +222,7 @@ def _extract_regions(img):
     return R
 
 
-# In[12]:
+# %%
 
 
 def _extract_neighbours(regions):
@@ -257,7 +249,7 @@ def _extract_neighbours(regions):
     return neighbours
 
 
-# In[13]:
+# %%
 
 
 def _merge_regions(r1, r2):
@@ -277,7 +269,7 @@ def _merge_regions(r1, r2):
     return rt
 
 
-# In[14]:
+# %%
 
 
 # randomly creates RGB
@@ -289,7 +281,7 @@ def random_rgb():
     return rgb
 
 
-# In[15]:
+# %%
 
 
 def show_result(img, regions):
@@ -321,7 +313,7 @@ def show_result(img, regions):
     #plt.show()
 
 
-# In[16]:
+# %%
 
 
 class Show_Result:
@@ -372,12 +364,43 @@ class Show_Result:
             self.ccols = 0
         else:
             self.ccols = self.ccols + 1
+    """
+    def addResult(self, regions):
+        candidates = set()
+        for r in regions:
+            # excluding same rectangle (with different segments)
+            if r['rect'] in candidates:
+                continue
+            # excluding regions smaller than 500 pixels
+            #if r['size'] < 500:
+            #    continue
+            # distorted rects
+            x, y, w, h = r['rect']
+            #if w / h > 1.2 or h / w > 1.2:
+            #    continue
+            candidates.add(r['rect'])
+            
+        self.ax[self.crows][self.ccols].imshow(self.img)
+            
+        for x, y, w, h in candidates:
+            #print(x, y, w, h)
+            rect = mpatches.Rectangle((x, y), w, h, fill=False, edgecolor='red', linewidth=1)
+            self.ax[self.crows][self.ccols].add_patch(rect)
+        self.ax[self.crows][self.ccols].set_title('test', fontsize=20)
+        
+        if self.ccols+1 == self.ncols:
+            self.crows = self.crows + 1
+            self.ccols = 0
+        else:
+            self.ccols = self.ccols + 1
+    
+    """
     def showResult(self):
         plt.show()
         
 
 
-# In[17]:
+# %%
 
 
 def get_regions(R):
@@ -395,7 +418,7 @@ def get_regions(R):
     return regions
 
 
-# In[18]:
+# %%
 
 
 def canAddResult(comp_len_S, current_len_S):
@@ -405,7 +428,7 @@ def canAddResult(comp_len_S, current_len_S):
         return False
 
 
-# In[19]:
+# %%
 
 
 def get_all_regions(R):
@@ -424,7 +447,7 @@ def get_all_regions(R):
     return regions
 
 
-# In[20]:
+# %%
 
 
 def selective_search(im_orig, scale=1.0, sigma=0.8, min_size=50):
@@ -553,7 +576,7 @@ def selective_search(im_orig, scale=1.0, sigma=0.8, min_size=50):
     #return img, regions
 
 
-# In[21]:
+# %%
 
 
 #img = skimage.data.astronaut()
@@ -562,8 +585,12 @@ IMG_PATH = './sampleImg/test.jpg'
 img = numpy.array(Image.open(IMG_PATH))
 img.shape
 
+sample = cv2.imread(IMG_PATH)
+plt.imshow(sample)
+plt.show()
 
-# In[22]:
+
+# %%
 
 
 global result
@@ -591,10 +618,12 @@ result = Show_Result(img, 3,3)
 #min_size : int
 #            Minimum component size for felzenszwalb segmentation.
 #print('\n\n\n-------------min_size를 조절할 경우------------------')
-#selective_search(img, scale=30, sigma=0.9, min_size=10)
+selective_search(img, scale=30, sigma=0.9, min_size=10)
 selective_search(img, scale=30, sigma=0.9, min_size=100)
-#selective_search(img, scale=30, sigma=0.9, min_size=300)
+selective_search(img, scale=30, sigma=0.9, min_size=300)
 
 result.fig.tight_layout()
 
 plt.show()
+
+
