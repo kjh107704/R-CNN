@@ -62,9 +62,15 @@ def get_channel_image(orig_img, channel):
 
 # %%
 heatmaps = []
+
+fig, ax = plt.subplots(nrows=1, ncols=len(orig_heatmaps))
+
 for index, orig_heatmap in enumerate(orig_heatmaps):
+    result = orig_heatmap*0.6 + img*0.4
+    ax[index].imshow(cv2.cvtColor(np.float32(result).astype('uint8'), cv2.COLOR_BGR2RGB))
     # orig_heatmap에서 `R` 계열이 가장 중요한 feature 부분을 나타내므로 해당 정보만 사용
     heatmaps.append(get_channel_image(orig_heatmap, 'r'))
+plt.show()
     
 fig, ax = plt.subplots(nrows=1, ncols=len(heatmaps))
     
