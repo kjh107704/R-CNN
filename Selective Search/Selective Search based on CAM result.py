@@ -4,8 +4,6 @@
 # # Parsing CAM data (.json)
 
 # %%
-from __future__ import print_function, division
-
 import json 
 import numpy as np
 import cv2
@@ -324,7 +322,7 @@ def get_candidate_bounding_box(SS_BB, CAM_BB):
                 iou = get_iou(ss_bb, cam_bb, changeScale = True)
                 if iou > 0.7:
                     if not isExist(bounding_box, ss_bb):
-                    bounding_box.append(ss_bb)
+                        bounding_box.append(ss_bb)
     return bounding_box
 
 
