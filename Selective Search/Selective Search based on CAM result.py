@@ -83,6 +83,7 @@ for cls in cam_class:
 # %%
 IMG_URL = "https://www.thesprucepets.com/thmb/N3hbYHfg7fmKylt00jxjgEOiwWE=/400x300/filters:no_upscale():max_bytes(150000):strip_icc()/running-with-dog-Westend61-getty-525469393-56a26b433df78cf772756764.jpg"
 
+
 # %%
 
 PIL_img = Image.open(urllib2.urlopen(IMG_URL))
@@ -108,11 +109,9 @@ plt.show()
 
 
 # %%
-# orig_heatmaps[0] = lion heatmap
-orig_heatmaps.append(cv2.applyColorMap(cv2.resize(lion_data, (width, height)), cv2.COLORMAP_JET))
+orig_heatmaps = []
 
-# orig_heatmaps[1] = tiger heatmap
-orig_heatmaps.append(cv2.applyColorMap(cv2.resize(tiger_data, (width, height)), cv2.COLORMAP_JET))
+height, width, _ = img.shape
 
 for index, cls in enumerate(cam_class):
     orig_heatmaps.append(cv2.applyColorMap(cv2.resize(data_list[index], (width, height)), cv2.COLORMAP_JET))
@@ -159,7 +158,7 @@ for index, heatmap in enumerate(heatmaps):
     # orig_heatmap의 R 채널 데이터를 gray scale로 출력
     ax[index].set_title(cam_class[index], fontsize=15)
     ax[index].imshow(cv2.cvtColor(heatmap, cv2.COLOR_BGR2GRAY), cmap='gray')
-    
+
 plt.savefig(SAVE_PATH+SAVE_DIR+'heatmap_R_channel_grayscale.png', bbox_inches='tight')
 plt.show()
 
@@ -359,7 +358,7 @@ def get_iou(_bb1, _bb2, changeScale = False, basedOnCAM = False):
     assert bb1['y1'] < bb1['y2']
     assert bb2['x1'] < bb2['x2']
     assert bb2['y1'] < bb2['y2']
-
+    
     # determine the coordinates of the intersection rectangle
     x_left = max(bb1['x1'], bb2['x1'])
     y_top = max(bb1['y1'], bb2['y1'])
@@ -384,7 +383,7 @@ def get_iou(_bb1, _bb2, changeScale = False, basedOnCAM = False):
         # cam_bb 기준 iou
         iou = intersection_area / float(bb2_area)
     else:
-    iou = intersection_area / float(bb1_area + bb2_area - intersection_area)
+        iou = intersection_area / float(bb1_area + bb2_area - intersection_area)
     
     assert iou >= 0.0
     assert iou <= 1.0
