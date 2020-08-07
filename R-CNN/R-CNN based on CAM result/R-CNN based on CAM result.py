@@ -42,7 +42,7 @@ import urllib.request as urllib2
 
 
 # %%
-PATH = './sampleImg/'
+PATH = './data/'
 SAVE_PATH = './result_original_iou_VGG/'
 
 
@@ -513,7 +513,7 @@ data_transforms = {
 model = models.vgg16(pretrained=False)
 model.classifier[-1] = nn.Linear(in_features=4096, out_features=len(classes))
 model = model.to(device)
-model.load_state_dict(torch.load('../R-CNN/PASCAL VOC 2012 R-CNN/TrainedModel/PretrainedTrue'))
+model.load_state_dict(torch.load('../PASCAL VOC 2012 R-CNN/TrainedModel/PretrainedTrue'))
 model.eval()
 
 # %% [markdown]
@@ -526,7 +526,7 @@ num_ftrs = model.fc.in_features
 model.fc = nn.Linear(num_ftrs, 20)
 
 model = model.to(device)
-model.load_state_dict(torch.load('../R-CNN/PASCAL VOC 2012 R-CNN/TrainedModel/ResNet_pretrained_True'))
+model.load_state_dict(torch.load('../PASCAL VOC 2012 R-CNN/TrainedModel/ResNet_pretrained_True'))
 model.eval()
 """
 
