@@ -4,6 +4,7 @@
 # # Parsing CAM data (.json)
 
 # %%
+from __future__ import print_function, division
 import matplotlib.pyplot as plt
 import random
 
