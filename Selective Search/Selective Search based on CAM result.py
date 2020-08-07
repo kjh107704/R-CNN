@@ -432,4 +432,270 @@ plt.savefig(SAVE_PATH+SAVE_DIR+'candidate_bbox.png', bbox_inches='tight')
 plt.show()
 
 
+# %%
+import json 
+import numpy as np
+import cv2
+from matplotlib import pyplot as plt
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.optim import lr_scheduler
+import torchvision
+from torchvision import datasets, models, transforms
+from torchvision.datasets import ImageFolder
+import time
+import os
+import copy
+import sys
+
+from PIL import Image
+from PIL import ImageFont
+from PIL import ImageDraw
+
+import urllib.request as urllib2
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+
+# %%
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
+
+
+# %%
+classes = ('aeroplane','bicycle','diningtable',
+           'dog','horse','motorbike','person','pottedplant','sheep','sofa','train','tvmonitor',
+           'bird','boat','bottle','bus','car','cat','chair','cow')
+
+
+# %%
+data_transforms = {
+    'train': transforms.Compose([
+        transforms.Resize((224,224)),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ]),
+    'val': transforms.Compose([
+        transforms.Resize((224,224)),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ]),
+    'test': transforms.Compose([
+        transforms.Resize((224,224)),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
+}
+
+# %% [markdown]
+# # vgg16
+
+# %%
+model = models.vgg16(pretrained=False)
+model.classifier[-1] = nn.Linear(in_features=4096, out_features=len(classes))
+model = model.to(device)
+model.load_state_dict(torch.load('../R-CNN/PASCAL VOC 2012 R-CNN/TrainedModel/PretrainedTrue'))
+model.eval()
+
+# %% [markdown]
+# # Resnet
+
+# %%
+"""
+model = models.resnet50(pretrained=True)
+num_ftrs = model.fc.in_features
+model.fc = nn.Linear(num_ftrs, 20)
+
+model = model.to(device)
+model.load_state_dict(torch.load('../R-CNN/PASCAL VOC 2012 R-CNN/TrainedModel/ResNet_pretrained_True'))
+model.eval()
+"""
+
+
+# %%
+def get_predict_result(probs):
+    predict_score, predict_class = torch.max(probs, 1)
+    return predict_score, predict_class
+
+
+# %%
+def get_predict(model, img):
+    model.eval()
+    
+    with torch.no_grad():
+        inputs = img.to(device)
+        inputs = inputs.unsqueeze(0)
+        outputs = model(inputs)
+        softmax = nn.Softmax(dim=1)
+        outputs = softmax(outputs)
+        #print(outputs)
+        return outputs
+        #predict_score, predict_class = torch.max(outputs, 1)
+        #print(predict_score)
+        #print(predict_class)
+        #return(predict_score, predict_class)
+
+
+# %%
+det_probs = []
+
+for index, (x, y, w, h) in enumerate(bounding_box):
+    area = (x, y, x + w, y + h)
+    timage = PIL_img.crop(area)
+    timage = data_transforms['test'](transforms.ToPILImage()(np.asarray(timage)))
+    prob = get_predict(model, timage)
+    det_probs.append(prob.tolist()[0])
+    
+det_probs = torch.as_tensor(det_probs)
+print(det_probs.shape)
+print(det_probs)
+
+
+# %%
+def draw_result(bounding_box, probs):
+    
+    draw = 0
+    _opencvImg = img.copy()
+    
+    figsize = width / float(dpi) , height / float(dpi)
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=figsize)
+    
+        
+    for cnt in range(len(bounding_box)):
+        
+        cls_idx = torch.argsort(probs[cnt, :], descending=True)[0]
+        
+        if probs[cnt][cls_idx] > 0:
+            print(f'class {classes[cls_idx]}: {probs[cnt][cls_idx]}')
+            draw += 1
+            x,y,w,h = bounding_box[cnt]
+            _opencvImg = cv2.rectangle(_opencvImg, (x, y,), (x+w, y+h), color[cls_idx], 2)
+            text = '{} ({:.3f})'.format(classes[cls_idx], probs[cnt][cls_idx])
+            cv2.putText(_opencvImg, text, (x, y+15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color[cls_idx], 1) 
+            
+            
+    ax.imshow(cv2.cvtColor(_opencvImg, cv2.COLOR_BGR2RGB))
+    title = f'final bbox: {draw}'
+    ax.set_title(title, fontsize=20)
+    plt.savefig(SAVE_PATH+SAVE_DIR+'result.png', bbox_inches='tight')
+    plt.show()
+    
+    print(f'final bbox: {draw}')
+    
+    return
+
+
+# %%
+def draw_result_by_class(bounding_box, probs):
+    
+    _opencvImg = img.copy()
+    dpi = 80
+    
+    height, width, depth = _opencvImg.shape
+    
+    figsize = width / float(dpi) * 5, height / float(dpi) * 4
+        
+    fig, ax = plt.subplots(nrows=4, ncols=5, figsize=figsize)
+    
+    for i in range(20):
+        row = int(i / 5)
+        col = i % 5
+        
+        _opencvImg = img.copy()
+        
+        draw = 0
+        
+        for cnt in range(len(bounding_box)):
+            
+            cls_idx = torch.argsort(probs[cnt, :], descending=True)[0]
+            if cls_idx == i:
+                if probs[cnt][cls_idx] > 0:
+                    draw += 1
+                    x,y,w,h = bounding_box[cnt]
+                    _opencvImg = cv2.rectangle(_opencvImg, (x, y,), (x+w, y+h), color[cls_idx], 3)
+                    text = '{} ({:.3f})'.format(classes[cls_idx], probs[cnt][cls_idx])
+                    cv2.putText(_opencvImg, text, (x, y+15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color[cls_idx], 2)
+        
+        title = classes[i] + ": "+str(draw)
+        ax[row][col].set_title(title, fontsize=20)
+        ax[row][col].imshow(cv2.cvtColor(_opencvImg, cv2.COLOR_BGR2RGB))
+
+    
+    plt.savefig(SAVE_PATH+SAVE_DIR+'result_by_class.png', bbox_inches='tight')
+
+
+# %%
+def nms(bounding_box, probs):
+    
+    bbox = []
+
+    for x, y, w, h in bounding_box:
+        bbox.append([x,y, x+w, y+h])
+    
+    
+    _opencvImg = img.copy()
+    bbox = torch.as_tensor(bbox).float()
+    probs = torch.as_tensor(probs)
+    for c in range(len(classes)):
+        
+        _cnt = 0
+        
+        # threshold 적용
+        
+        prob = probs[:, c].clone()
+        
+        m = nn.Threshold(0.2, 0)
+        
+        prob = m(prob)
+        
+        order = torch.argsort(prob, descending=True)
+        
+        #print(prob)
+        #print(order)
+        
+        for i in range(len(order)):
+            printProgressBar (i, len(order), prefix = f'class {c}', suffix = 'complete', length = 50)
+            bbox_max = bbox[order[i]]
+            for j in range(i+1, len(order)):
+                bbox_cur = bbox[order[j]]
+                
+                if get_iou(bbox_max, bbox_cur) > 0.5:
+                    prob[order[j]] = 0
+        
+        printProgressBar (len(order), len(order), prefix = f'class {c}', suffix = 'complete', length = 50)
+        probs[:, c] = prob
+        
+    return probs
+    return 
+
+
+# %%
+final_probs = nms(bounding_box, det_probs)
+draw_result(bounding_box, final_probs)
+draw_result_by_class(bounding_box, final_probs)
+
+
+# %%
+
+
 
