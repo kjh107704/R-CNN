@@ -338,27 +338,8 @@ plt.show()
 
 
 # %%
-_img2 = img.copy()
-
-for index, (x, y, w, h)  in enumerate(SS_BB):
-    if index < 1000:
-        cv2.rectangle(_img2, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-plt.imshow(cv2.cvtColor(_img2, cv2.COLOR_BGR2RGB))
-
-
-# %%
-_img2 = img.copy()
-
-for index, (x, y, w, h)  in enumerate(SS_BB):
-    if index < 500:
-        cv2.rectangle(_img2, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-plt.imshow(cv2.cvtColor(_img2, cv2.COLOR_BGR2RGB))
-
-
-# %%
-def get_iou(_bb1, _bb2, changeScale = False):
+def get_iou(_bb1, _bb2, changeScale = False, basedOnCAM = False):
+    # _bb2 == cam_bb
     if changeScale:
         # _bb1, _bb2 = [x, y, w, h]
         if len(_bb1) == 4 and len(_bb2) == 4:
@@ -368,8 +349,10 @@ def get_iou(_bb1, _bb2, changeScale = False):
             exit(0)
     else:
         # _bb1, _bb2 = ['x1':x1, 'x2':x2, 'y1':y1, 'y2':y2]
-        bb1 = _bb1
-        bb2 = _bb2
+        x1, y1, x2, y2 = _bb1
+        bb1 = {"x1": x1, "y1": y1, "x2": x2, "y2": y2}
+        x1, y1, x2, y2 = _bb2
+        bb2 = {"x1": x1, "y1": y1, "x2": x2, "y2": y2}
     
     
     assert bb1['x1'] < bb1['x2']
@@ -396,8 +379,13 @@ def get_iou(_bb1, _bb2, changeScale = False):
 
     # compute the intersection over union by taking the intersection
     # area and dividing it by the sum of prediction + ground-truth
-    # areas - the interesection area
+    
+    if basedOnCAM:
+        # cam_bb 기준 iou
+        iou = intersection_area / float(bb2_area)
+    else:
     iou = intersection_area / float(bb1_area + bb2_area - intersection_area)
+    
     assert iou >= 0.0
     assert iou <= 1.0
     return iou
@@ -421,7 +409,7 @@ def get_candidate_bounding_box(SS_BB, CAM_BB):
     for ss_bb in SS_BB:
         for cam_bbs in CAM_BB:
             for cam_bb in cam_bbs:
-                iou = get_iou(ss_bb, cam_bb, changeScale = True)
+                iou = get_iou(ss_bb, cam_bb, changeScale = True, basedOnCAM=True)
                 if iou > 0.7:
                     if not isExist(bounding_box, ss_bb):
                         bounding_box.append(ss_bb)
