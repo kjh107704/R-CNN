@@ -95,6 +95,18 @@ height, width, depth = img.shape
 plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 
 
+# %%
+figsize = width / float(dpi) , height / float(dpi)
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize=figsize)
+_result_img = img.copy()
+ax.imshow(cv2.cvtColor(_result_img, cv2.COLOR_BGR2RGB))
+title = 'original image'
+ax.set_title(title, fontsize=20)
+plt.savefig(SAVE_PATH+SAVE_DIR+'original_image.png', bbox_inches='tight')
+plt.show()
+
+
+# %%
 # orig_heatmaps[0] = lion heatmap
 orig_heatmaps.append(cv2.applyColorMap(cv2.resize(lion_data, (width, height)), cv2.COLORMAP_JET))
 
@@ -129,20 +141,25 @@ def get_channel_image(orig_img, channel):
 heatmaps = []
 
 fig, ax = plt.subplots(nrows=1, ncols=len(orig_heatmaps))
-
+fig.suptitle('heatmap')
 for index, orig_heatmap in enumerate(orig_heatmaps):
     result = orig_heatmap*0.6 + img*0.4
+    ax[index].set_title(cam_class[index], fontsize=15)
     ax[index].imshow(cv2.cvtColor(np.float32(result).astype('uint8'), cv2.COLOR_BGR2RGB))
     # orig_heatmap에서 `R` 계열이 가장 중요한 feature 부분을 나타내므로 해당 정보만 사용
     heatmaps.append(get_channel_image(orig_heatmap, 'r'))
+    
+plt.savefig(SAVE_PATH+SAVE_DIR+'heatmap.png', bbox_inches='tight')
 plt.show()
     
 fig, ax = plt.subplots(nrows=1, ncols=len(heatmaps))
-    
+fig.suptitle('heatmap R channel')
 for index, heatmap in enumerate(heatmaps):
     # orig_heatmap의 R 채널 데이터를 gray scale로 출력
+    ax[index].set_title(cam_class[index], fontsize=15)
     ax[index].imshow(cv2.cvtColor(heatmap, cv2.COLOR_BGR2GRAY), cmap='gray')
     
+plt.savefig(SAVE_PATH+SAVE_DIR+'heatmap_R_channel_grayscale.png', bbox_inches='tight')
 plt.show()
 
 # %% [markdown]
@@ -182,14 +199,21 @@ for index, heatmap in enumerate(heatmaps):
 
 # threshold가 적용된 graymap 결과 확인
 fig, ax = plt.subplots(nrows=1, ncols=len(graymaps))
+fig.suptitle('grayscale heatmap + threshold', fontsize=20)
 for index, graymap in enumerate(graymaps):
+    ax[index].set_title(cam_class[index], fontsize=15)
     ax[index].imshow(graymap, cmap="gray")
+    
+plt.savefig(SAVE_PATH+SAVE_DIR+'heatmap_grayscale_threshold.png', bbox_inches='tight')
 plt.show()
 
 
 fig, ax = plt.subplots(nrows=1, ncols=len(graymaps))
+fig.suptitle('contour area', fontsize=20)
 for index, graymap in enumerate(graymaps):
+    ax[index].set_title(cam_class[index], fontsize=15)
     ax[index].imshow(get_masked_image(img, graymap))
+plt.savefig(SAVE_PATH+SAVE_DIR+'heatmap_grayscale_threshold_mask.png', bbox_inches='tight')
 plt.show()
 
 
@@ -250,12 +274,15 @@ def get_image_of_compare_contour_and_bounding_box(img_binary, img):
 
 
 # %%
-fig, ax = plt.subplots(nrows=1, ncols=len(heatmaps))
+figsize = width / float(dpi) , height / float(dpi) * 2
+fig, ax = plt.subplots(nrows=1, ncols=len(heatmaps), figsize=figsize)
 
 for index, graymap in enumerate(graymaps):
     # contour 영역과 bounding box 비교
+    ax[index].set_title(cam_class[index], fontsize=20)
     ax[index].imshow(get_image_of_compare_contour_and_bounding_box(graymap, img))
     
+plt.savefig(SAVE_PATH+SAVE_DIR+'CAM_contour.png', bbox_inches='tight')
 plt.show()
 
 
@@ -265,7 +292,15 @@ CAM_BB = []
 for index, graymap in enumerate(graymaps):
     CAM_BB.append(get_bounding_box(graymap))
 
-plt.imshow(draw_bounding_box(CAM_BB, img))
+_result_img = draw_bounding_box(CAM_BB, img)
+
+figsize = width / float(dpi) , height / float(dpi)
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize=figsize)
+ax.imshow(_result_img)
+title = 'CAM bounding box'
+ax.set_title(title, fontsize=20)
+plt.savefig(SAVE_PATH+SAVE_DIR+'CAM_bbox.png', bbox_inches='tight')
+plt.show()
 
 # %% [markdown]
 # # Selective Search 결과와 CAM Bounding Box 비교
@@ -289,17 +324,16 @@ def cv2_selective_search(img, searchMethod='f'):
 SS_BB = cv2_selective_search(img)
 
 print(f'num of all regions by ss: {len(SS_BB)}')
-plt.imshow(draw_bounding_box(SS_BB, img))
+_result_img = draw_bounding_box(SS_BB, img)
 
 
-# %%
-_img = img.copy()
-
-for index, (x, y, w, h)  in enumerate(SS_BB):
-    if index < 2000:
-        cv2.rectangle(_img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-plt.imshow(cv2.cvtColor(_img, cv2.COLOR_BGR2RGB))
+figsize = width / float(dpi) , height / float(dpi)
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize=figsize)
+ax.imshow(_result_img)
+title = f'SS bbox: {len(SS_BB)}'
+ax.set_title(title, fontsize=20)
+plt.savefig(SAVE_PATH+SAVE_DIR+'SS_bbox.png', bbox_inches='tight')
+plt.show()
 
 
 # %%
@@ -398,7 +432,15 @@ bounding_box = get_candidate_bounding_box(SS_BB, CAM_BB)
 
 
 # %%
-plt.imshow(draw_bounding_box(bounding_box, img))
-print(f'num of candidate bounding box: {len(bounding_box)}')
+_result_img = draw_bounding_box(bounding_box, img)
+
+figsize = width / float(dpi) , height / float(dpi)
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize=figsize)
+ax.imshow(_result_img)
+title = f'num of candidate bounding box: {len(bounding_box)}'
+ax.set_title(title, fontsize=20)
+plt.savefig(SAVE_PATH+SAVE_DIR+'candidate_bbox.png', bbox_inches='tight')
+plt.show()
+
 
 
