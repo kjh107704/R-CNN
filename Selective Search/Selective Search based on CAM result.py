@@ -4,6 +4,28 @@
 # # Parsing CAM data (.json)
 
 # %%
+import matplotlib.pyplot as plt
+import random
+
+number_of_colors = 20
+
+color = []
+
+while len(color) < 20:
+    r = random.randint(0,255)
+    g = random.randint(0,255)
+    b = random.randint(0,255)
+    rgb = [r,g,b]
+    color.append(rgb)
+    
+print(color)
+
+
+# %%
+color = [[44, 195, 74], [62, 208, 80], [53, 230, 195], [20, 216, 183], [235, 220, 95], [16, 138, 103], [170, 172, 255], [17, 150, 98], [252, 125, 2], [142, 155, 193], [117, 25, 29], [235, 119, 120], [105, 211, 222], [66, 52, 154], [1, 33, 128], [72, 182, 183], [183, 35, 106], [216, 217, 0], [204, 201, 74], [39, 41, 236]]
+
+
+# %%
 import json 
 import numpy as np
 import cv2
