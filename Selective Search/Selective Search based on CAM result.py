@@ -76,11 +76,11 @@ for cls in cam_class:
 # # heatmap 동작 확인
 
 # %%
-orig_heatmaps = []
+#IMG_URL = "https://image.chosun.com/sitedata/image/201809/10/2018091002391_0.jpg"
 
 
-img = cv2.imread(PATH+"lion_tiger.jpg")
-height, width, _ = img.shape
+# %%
+IMG_URL = "https://www.thesprucepets.com/thmb/N3hbYHfg7fmKylt00jxjgEOiwWE=/400x300/filters:no_upscale():max_bytes(150000):strip_icc()/running-with-dog-Westend61-getty-525469393-56a26b433df78cf772756764.jpg"
 
 # orig_heatmaps[0] = lion heatmap
 orig_heatmaps.append(cv2.applyColorMap(cv2.resize(lion_data, (width, height)), cv2.COLORMAP_JET))
