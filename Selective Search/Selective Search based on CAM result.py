@@ -31,6 +31,14 @@ import numpy as np
 import cv2
 from matplotlib import pyplot as plt
 
+from PIL import Image
+from PIL import ImageFont
+from PIL import ImageDraw
+
+import os
+
+import urllib.request as urllib2
+
 
 # %%
 PATH = './sampleImg/'
