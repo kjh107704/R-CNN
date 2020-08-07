@@ -42,10 +42,25 @@ import urllib.request as urllib2
 
 # %%
 PATH = './sampleImg/'
+SAVE_PATH = './result_original_iou_VGG/'
 
 
 # %%
-with open(PATH+"liontiger.json") as json_file:
+#PATH = './sampleImg/'
+#SAVE_PATH = './result_original_iou_Resnet/'
+
+
+# %%
+SAVE_DIR = 'person_dog_2/'
+
+
+# %%
+if not os.path.exists(SAVE_PATH+SAVE_DIR):
+    os.makedirs(SAVE_PATH+SAVE_DIR)
+
+
+# %%
+with open(PATH+"persondog_2.json") as json_file:
     json_data = json.load(json_file)
 
 lion_data = np.array(json_data["lion"], dtype='uint8')
