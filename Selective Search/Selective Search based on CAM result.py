@@ -63,8 +63,14 @@ if not os.path.exists(SAVE_PATH+SAVE_DIR):
 with open(PATH+"persondog_2.json") as json_file:
     json_data = json.load(json_file)
 
-lion_data = np.array(json_data["lion"], dtype='uint8')
-tiger_data = np.array(json_data["tiger"], dtype='uint8')
+cam_class = ["person", "dog"]
+
+
+# %%
+data_list = []
+
+for cls in cam_class:
+    data_list.append(np.array(json_data[cls], dtype='uint8'))
 
 # %% [markdown]
 # # heatmap 동작 확인
@@ -81,6 +87,9 @@ orig_heatmaps.append(cv2.applyColorMap(cv2.resize(lion_data, (width, height)), c
 
 # orig_heatmaps[1] = tiger heatmap
 orig_heatmaps.append(cv2.applyColorMap(cv2.resize(tiger_data, (width, height)), cv2.COLORMAP_JET))
+
+for index, cls in enumerate(cam_class):
+    orig_heatmaps.append(cv2.applyColorMap(cv2.resize(data_list[index], (width, height)), cv2.COLORMAP_JET))
 
 # %% [markdown]
 # # color channel별 heatmap 뽑기
