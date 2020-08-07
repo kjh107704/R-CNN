@@ -82,6 +82,19 @@ for cls in cam_class:
 # %%
 IMG_URL = "https://www.thesprucepets.com/thmb/N3hbYHfg7fmKylt00jxjgEOiwWE=/400x300/filters:no_upscale():max_bytes(150000):strip_icc()/running-with-dog-Westend61-getty-525469393-56a26b433df78cf772756764.jpg"
 
+# %%
+
+PIL_img = Image.open(urllib2.urlopen(IMG_URL))
+
+img = cv2.cvtColor(np.array(PIL_img), cv2.COLOR_RGB2BGR)
+
+dpi = 80
+    
+height, width, depth = img.shape
+
+plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+
+
 # orig_heatmaps[0] = lion heatmap
 orig_heatmaps.append(cv2.applyColorMap(cv2.resize(lion_data, (width, height)), cv2.COLORMAP_JET))
 
