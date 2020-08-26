@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[2]:
+
+
 from __future__ import print_function, division
 
 import matplotlib.pyplot as plt
@@ -24,9 +30,17 @@ import time
 import copy
 import sys
 
+
+# In[23]:
+
+
 classes = ('aeroplane','bicycle','diningtable',
            'dog','horse','motorbike','person','pottedplant','sheep','sofa','train','tvmonitor',
            'bird','boat','bottle','bus','car','cat','chair','cow')
+
+
+# In[ ]:
+
 
 data_transforms = {
     'test': transforms.Compose([
@@ -35,6 +49,10 @@ data_transforms = {
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
 }
+
+
+# In[4]:
+
 
 class SAVE_IMAGE:
     
@@ -81,6 +99,12 @@ class SAVE_IMAGE:
         plt.savefig(save_path+save_title+'.png', bbox_inches='tight')
 
 
+# In[ ]:
+
+
+# In[5]:
+
+
 def GenerateRandomColor(num_of_class):
     color = []
 
@@ -93,9 +117,16 @@ def GenerateRandomColor(num_of_class):
     
     return color
 
+
+# In[6]:
+
+
 def CheckDirExists(PATH, DIR):
     if not os.path.exists(PATH+DIR):
         os.makedirs(PATH+DIR)
+
+
+# In[7]:
 
 
 def SaveOriginalImage(img):
@@ -104,6 +135,9 @@ def SaveOriginalImage(img):
     
     save_image.addImage(img)
     save_image.saveImage(RESULT_PATH+RESULT_DIR, "base_image")
+
+
+# In[8]:
 
 
 def GetHeatmap(img_list, height, width, title = "", figSet = False, fig = [0, 0]):
@@ -126,6 +160,9 @@ def GetHeatmap(img_list, height, width, title = "", figSet = False, fig = [0, 0]
     return heatmaps
 
 
+# In[9]:
+
+
 # orig_img에서 (R, G, B) 세 가지 채널의 정보 중 특정 채널의 정보만 남겨서 넘김
 def GetChannelImage(orig_img, channel):
     channel = channel.upper()
@@ -143,6 +180,9 @@ def GetChannelImage(orig_img, channel):
     return channel_img
 
 
+# In[10]:
+
+
 # color image를 gray scale로 바꾼 후, threshold를 적용함
 # threshold는 고정 값으로 mean(min, max)
 def GetGrayscaleImageWithThreshold(orig_img):
@@ -157,6 +197,9 @@ def GetGrayscaleImageWithThreshold(orig_img):
     return gray_img
 
 
+# In[11]:
+
+
 # grayscale_mask 에서 1인 부분만 orig_img를 보여줌. 0인 부분은 검정색으로 보임
 def GetMaskedImage(orig_img, gray_map):
     mask = cv2.cvtColor(gray_map, cv2.COLOR_GRAY2BGR)
@@ -164,6 +207,9 @@ def GetMaskedImage(orig_img, gray_map):
     maskedRegion = np.where(mask == 1, orig_img, 0)
     
     return cv2.cvtColor(maskedRegion, cv2.COLOR_BGR2RGB)
+
+
+# In[12]:
 
 
 def GetGrayscaleHeatmap(heatmaps, title = "", figSet = False, fig = [0, 0]):
@@ -190,10 +236,16 @@ def GetGrayscaleHeatmap(heatmaps, title = "", figSet = False, fig = [0, 0]):
     return result
 
 
+# In[13]:
+
+
 def GetContours(img_binary):
     contours, hierarchy = cv2.findContours(img_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
     return contours
+
+
+# In[14]:
 
 
 def GetBBox(img_binary):
@@ -206,6 +258,9 @@ def GetBBox(img_binary):
         bb.append([x, y, w, h])
         
     return bb
+
+
+# In[15]:
 
 
 def DrawBBox(bounding_box, img):
@@ -222,6 +277,9 @@ def DrawBBox(bounding_box, img):
                 cv2.rectangle(tmp_img, (x, y), (x + w, y + h), (0, 255, 0), 2)
         
     return cv2.cvtColor(tmp_img, cv2.COLOR_BGR2RGB)
+
+
+# In[16]:
 
 
 def DrawContourAndBBox(img_binary, img):
@@ -241,6 +299,10 @@ def DrawContourAndBBox(img_binary, img):
         
     return cv2.cvtColor(tmp_img, cv2.COLOR_BGR2RGB)
 
+
+# In[17]:
+
+
 def CompareContourAndBBox(heatmaps, title = "", figSet = False, fig = [0, 0]):
     _title = "_contour"
     
@@ -251,6 +313,9 @@ def CompareContourAndBBox(heatmaps, title = "", figSet = False, fig = [0, 0]):
     for index, heatmap in enumerate(heatmaps):
         save_image.addImage(DrawContourAndBBox(heatmap, CV2_IMG))
     save_image.saveImage(RESULT_PATH+RESULT_DIR, title+_title)
+
+
+# In[ ]:
 
 
 def GetIOU(_bb1, _bb2, changeScale = False, basedOnCAM = False):
@@ -306,11 +371,17 @@ def GetIOU(_bb1, _bb2, changeScale = False, basedOnCAM = False):
     return iou
 
 
+# In[ ]:
+
+
 def isExist(bounding_box, bb):
     for _bb in bounding_box:
         if np.array_equal(_bb, bb):
             return True
     return False
+
+
+# In[ ]:
 
 
 def GetCandidateBBox(FM_BB, CAM_BB):
@@ -327,6 +398,9 @@ def GetCandidateBBox(FM_BB, CAM_BB):
                     bounding_box.append(fm_bb)
                 
     return bounding_box
+
+
+# In[ ]:
 
 
 def NMS(bounding_box, probs):
@@ -370,6 +444,8 @@ def NMS(bounding_box, probs):
     return 
 
 
+# In[ ]:
+
 def get_predict(model, img):
     model.eval()
     
@@ -412,6 +488,8 @@ def DrawResultByClass(bounding_box, probs, fig = [5, 4]):
     save_image.saveImage(RESULT_PATH+RESULT_DIR, "draw_result_by_class")
 
 
+# In[ ]:
+
 def cv2_selective_search(img, searchMethod='f'):
     ss = cv2.ximgproc.segmentation.createSelectiveSearchSegmentation()
     ss.setBaseImage(img)
@@ -452,6 +530,9 @@ def DrawResult(bounding_box, probs):
     save_image.saveImage(RESULT_PATH+RESULT_DIR, "result")
     
     return
+
+
+# In[22]:
 
 
 def GetBoundingBox(IMG_URL, CAM_RESULT, FEATURE_MAP, fig = [0, 0], dir_name = ""):
@@ -613,7 +694,7 @@ def R_CNN(IMG_URL, candidate_bbox, fig = [0, 0], dir_name = ""):
     model.fc = nn.Linear(num_ftrs, 20)
 
     model = model.to(device)
-    model.load_state_dict(torch.load('./Model/Resnet50_ratio&size'))
+    model.load_state_dict(torch.load('./Model/Resnet50_pretrained_True'))
     model.eval()
     
     det_probs = []
