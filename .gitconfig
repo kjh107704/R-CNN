@@ -1,0 +1,18 @@
+[user]
+  email = kjh107704@gmail.com
+  name = Juhui Kim
+[github]
+  user = kjh107704
+
+[commit]
+  template = .gitmessage.txt
+
+[diff]
+    tool = default-difftool
+[difftool "default-difftool"]
+    cmd = code --wait --diff $LOCAL $REMOTE
+
+[merge]
+    tool = vscode
+[mergetool "vscode"]
+    cmd = code --wait $MERGED
